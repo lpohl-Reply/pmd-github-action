@@ -93,7 +93,7 @@ inputs:
       By default, the description is shown in the github annotations. You can
       disable the description to make it look more sleek.
     required: false
-    default: true
+    default: 'true'
   uploadSarifReport:
     description: >-
       By default, the generated SARIF report will be uploaded as an artifact
