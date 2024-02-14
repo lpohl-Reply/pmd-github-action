@@ -22,7 +22,7 @@ jobs:
             - name: Checkout wiki code
               uses: actions/checkout@v4
               with:
-                repository: ${{github.repository}}.wiki@main
+                repository: ${{github.repository}}.wiki@master
                 token: ${{ secrets.GH_PAT }}
                 path: markdown
             - name: Create environment
