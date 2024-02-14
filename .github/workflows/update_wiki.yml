@@ -21,7 +21,7 @@ jobs:
             - name: Checkout wiki code
               uses: actions/checkout@v2
               with:
-                repository: ${{github.repository}}.wiki
+                repository: ${{github.repository}}.wiki@main
                 path: wiki
             - name: Create environment
               run: |
@@ -32,12 +32,17 @@ jobs:
                 pip3 install -r requirements.txt
             - name: Retrieve package version
               run: |
-                python3 get_ruleset.py ${{ github.event.inputs.pmd_version }}
+                cd wiki
+                source .env/bin/activate
+                python3 wiki/get_ruleset.py ${{ github.event.inputs.pmd_version }}
             - name: Update wiki
               run: |
+                cd wiki
+                source .env/bin/activate
                 python3 generate_wiki.py
             - name: Push to wiki
               run: |
+                cd wiki
                 git config --local user.email "action@github.com"
                 git config --local user.name "GitHub Action"
                 git add .
