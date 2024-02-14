@@ -37,7 +37,7 @@ jobs:
                 cd wiki
                 ls
                 source .env/bin/activate
-                python3 wiki/get_ruleset.py ${{ github.event.inputs.pmd_version }}
+                python3 get_ruleset.py ${{ github.event.inputs.pmd_version }}
             - name: Update wiki
               run: |
                 cd wiki
