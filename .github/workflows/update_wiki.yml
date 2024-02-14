@@ -1,0 +1,42 @@
+
+name: Update Wiki
+
+on:
+    workflow_dispatch:
+      inputs:
+        pmd_version:
+          required: true
+          description: What PMD version should the wiki be based on
+  
+jobs:
+    regenerate:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                python-version: '3.x'
+                architecture: 'x64'
+            - name: Checkout wiki code
+              uses: actions/checkout@v2
+              with:
+                repository: ${{github.repository}}.wiki
+                path: markdown
+            - name: Create environment
+              run: |
+                python3 -m venv .env
+                source .env/bin/activate
+                pip3 install -r requirements.txt
+            - name: Retrieve package version
+              run: |
+                python3 get_rulesets.py ${{ github.event.inputs.pmd_version }}
+            - name: Update wiki
+              run: |
+                python3 generate_wiki.py
+            - name: Push to wiki
+              run: |
+                git config --local user.email "action@github.com"
+                git config --local user.name "GitHub Action"
+                git add .
+                git diff-index --quiet HEAD || git commit -m "Changed version to ${{ github.event.inputs.pmd_version }}" && git push
