@@ -7,9 +7,9 @@ on:
         pmd_version:
           required: true
           description: What PMD version should the wiki be based on
-  
+
 jobs:
-    regenerate:
+    update-wiki:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
@@ -31,7 +31,7 @@ jobs:
                 pip3 install -r requirements.txt
             - name: Retrieve package version
               run: |
-                python3 get_rulesets.py ${{ github.event.inputs.pmd_version }}
+                python3 get_ruleset.py ${{ github.event.inputs.pmd_version }}
             - name: Update wiki
               run: |
                 python3 generate_wiki.py
