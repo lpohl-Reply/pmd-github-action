@@ -22,8 +22,8 @@ jobs:
             - name: Checkout wiki code
               uses: actions/checkout@v4
               with:
-                repository: ${{github.repository}}.wiki
-                token: ${{ secrets.GH_PAT }}
+                repository: ${{ github.repository }}.wiki
+                ssh-key: ${{ secrets.GH_SSH_KEY }}
                 path: wiki
             - name: Create environment
               run: |
