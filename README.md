@@ -1,76 +1,16 @@
 # GitHub Action for PMD
 
-<a href="https://github.com/pmd/pmd-github-action/actions"><img alt="pmd-github-action status" src="https://github.com/pmd/pmd-github-action/actions/workflows/test.yml/badge.svg"></a>
-<a href="https://img.shields.io/github/v/release/pmd/pmd-github-action"><img alt="release" src="https://img.shields.io/github/v/release/pmd/pmd-github-action"></a>
+[![Regenerate CHANGELOG and dist](https://github.com/vwgsfcoe/pmd-github-action/actions/workflows/generate.yml/badge.svg?branch=main)](https://github.com/vwgsfcoe/pmd-github-action/actions/workflows/generate.yml)
 
-This action runs [PMD](https://pmd.github.io) static code analysis checks.
+This repository also contains the workflow for the PMD code checker and the corresponding wiki. The code checker is a fork of the [pmd-github-action repository](https://github.com/pmd/pmd-github-action) with the addition and changes required to limit the text in the Pull request annotations, link this wiki and fail a Pull Request if a violation with a specific priority is found.
 
-It can execute PMD with your own ruleset against your project. It creates a [SARIF](https://docs.oasis-open.org/sarif/sarif/v2.1.0/sarif-v2.1.0.html)
-report which is uploaded as a build artifact. Furthermore the build can be failed based on the number of violations (see the extended examples).
+The [wiki](https://github.com/vwgsfcoe/sf-delta-deploy/wiki) contains all violations and is generated using the Update PMD Wiki workflow, given a specific version of the PMD code checker. The releases, and hence versions, can be found [here](https://github.com/pmd/pmd/releases). If an override ruleset is used/adapted, such as the `reply_ruleset.xml`, it has to be updated in the seperate wiki repository, under `override_ruleset`.
 
-The action can also be used as a code scanner to create "Code scanning alerts".
+When changes to the code checker plugin are made, such as the looks of the Annotations, the `Regenerate dist for PMD checker` workflow should create a new `dist/index.js`. If this is not the case run `npm run all` or `npm prepare` in `addons/pmd-code-checker/`, this should generate the `dist/index.js` which can then be manually pushed.
 
 ## Usage
 
-The input `rulesets` is mandatory.
-
-### Basic
-
-```yaml
-steps:
-  - uses: actions/checkout@v3
-  - uses: actions/setup-java@v3
-    with:
-      distribution: 'temurin'
-      java-version: '11'
-  - uses: pmd/pmd-github-action@v1
-    with:
-      rulesets: 'ruleset.xml'
-```
-
-### Extended
-
-Use a specific PMD version (6.40.0) and fail the build based on the number of violations:
-
-```yaml
-steps:
-  - uses: actions/checkout@v3
-  - uses: actions/setup-java@v3
-    with:
-      distribution: 'temurin'
-      java-version: '11'
-  - uses: pmd/pmd-github-action@v1
-    id: pmd
-    with:
-      version: '6.40.0'
-      sourcePath: 'src/main/java'
-      rulesets: 'rulesets/java/quickstart.xml,ruleset.xml'
-  - name: Fail build if there are violations
-    if: steps.pmd.outputs.violations != 0
-    run: exit 1
-```
-
-Create Code scanning alerts by uploading a SARIF file to GitHub:
-
-```yaml
-steps:
-  - uses: actions/checkout@v3
-  - uses: actions/setup-java@v3
-    with:
-      distribution: 'temurin'
-      java-version: '11'
-  - uses: pmd/pmd-github-action@v1
-    with:
-      rulesets: 'ruleset.xml'
-      analyzeModifiedFilesOnly: false
-  - name: Upload SARIF file
-    uses: github/codeql-action/upload-sarif@v1
-    with:
-      sarif_file: pmd-report.sarif
-```
-
-The created alerts are available in the project under "Security" / "Code scanning alerts".
-See also [Uploading a SARIF file to GitHub](https://docs.github.com/en/code-security/code-scanning/integrating-with-code-scanning/uploading-a-sarif-file-to-github).
+An example for the usage can be seen in `code-checker.yml`.
 
 ## Inputs
 
@@ -83,6 +23,8 @@ See also [Uploading a SARIF file to GitHub](https://docs.github.com/en/code-secu
 |`rulesets`  |yes|        |Comma separated list of ruleset names to use.|
 |`analyzeModifiedFilesOnly`|no|"true"|Instead of analyze all files under "sourcePath", only the files that have been touched in a pull request or push will be analyzed. This makes the analysis faster and helps especially bigger projects which gradually want to introduce PMD. This helps in enforcing that no new code violation is introduced.<br>Depending on the analyzed language, the results might be less accurate results. At the moment, this is not a problem, as PMD mostly analyzes each file individually, but that might change in the future.<br>If the change is very big, not all files might be analyzed. Currently the maximum number of modified files is 300.<br>Note: When using PMD as a code scanner in order to create "Code scanning alerts" on GitHub, all files should be analyzed in order to produce a complete picture of the project. Otherwise alerts might get closed too soon.|
 |`createGitHubAnnotations`|no|"true"|By default, all detected violations are added as annotations to the pull request. You can disable this by setting FALSE. This can be useful if you are using another tool for this purpose.|
+|`countViolationsPriorityFilter`|no|5|By default, all detected violations are counted as violations. You can filter the count based on priority using this.|
+|`displayAnnotationDescription`|no|false|By default, the description is shown in the github annotations. You can disable the description to make it look more sleek.|
 |`uploadSarifReport`|no|"true"|By default, the generated SARIF report will be uploaded as an artifact named "PMD Report". This can be disabled, e.g. if there are multiple executions on multiple os of this action.|
 
 ## Outputs
@@ -106,24 +48,3 @@ Below are a list of known limitations for the **PMD GitHub Action**:
 
 *   Setting additional environment variables is not possible. This might be needed for some languages,
     e.g. [Visualforce](https://pmd.github.io/latest/pmd_languages_visualforce.html).
-
-## Other similar actions for PMD
-
-[Github Marketplace PMD Actions](https://github.com/marketplace?type=actions&query=pmd):
-
-| Marketplace | Github | License |
-|-------------|--------|---------|
-|https://github.com/marketplace/actions/pmd-analyser | https://github.com/synergy-au/pmd-analyser-action | MIT |
-|https://github.com/marketplace/actions/push-pmd-report | https://github.com/jwgmeligmeyling/pmd-github-action | MIT |
-|https://github.com/marketplace/actions/pmd-automatic-reviewer | https://github.com/krukmat/setup-pmd | MIT |
-|https://github.com/marketplace/actions/pmd-code-analyzer-action | https://github.com/billyan2018/setup-pmd | MIT |
-|https://github.com/marketplace/actions/pmd-analyzer-action | https://github.com/RTJL/pmd-analyzer-action | ? |
-|https://github.com/marketplace/actions/pmd-source-code-analyzer-action | https://github.com/sfdx-actions/setup-pmd | MIT |
-|https://github.com/marketplace/actions/pmd-source-code-analyzer-action-for-sap | https://github.com/ashkumar-wtc/setup-pmd | MIT |
-|https://github.com/marketplace/actions/pmd-salesforce-apex-code-analyzer-action | https://github.com/legetz/setup-pmd | MIT |
-|https://github.com/marketplace/actions/powermode-scan | https://github.com/ncino/powermode-scan |
-|https://github.com/marketplace/actions/sfdx-scan-pull-request | https://github.com/mitchspano/sfdx-scan-pull-request | Apache 2.0 |
-
-## License
-
-The scripts and documentation in this project are released under the [MIT License](LICENSE)

@@ -82,6 +82,18 @@ inputs:
       are using another tool for this purpose.
     required: false
     default: 'true'
+  countViolationsPriorityFilter:
+    description: >-
+      By default, all detected violations are counted as violations. You can
+      filter the count based on priority using this.
+    required: false
+    default: '5'
+  displayAnnotationDescription:
+    description: >-
+      By default, the description is shown in the github annotations. You can
+      disable the description to make it look more sleek.
+    required: false
+    default: 'true'
   uploadSarifReport:
     description: >-
       By default, the generated SARIF report will be uploaded as an artifact
